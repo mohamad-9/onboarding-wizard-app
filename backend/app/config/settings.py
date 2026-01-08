@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """
 
     MYSQL_USER: str = "onboard_user"
-    MYSQL_PASSWORD: str = "OnboardPass123!"
+    MYSQL_PASSWORD: str = "OnboardPass123!" 
     MYSQL_HOST: str = "127.0.0.1"
     MYSQL_PORT: int = 3306
     MYSQL_DB: str = "onboarding_app"
