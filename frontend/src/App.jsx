@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 
-import Onboarding from "./pages/Onboarding";
+import Wizard from "./pages/Wizard";
 import Admin from "./pages/Admin";
 import Data from "./pages/Data";
 
@@ -14,7 +14,7 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<Onboarding />} />
+        <Route path="/" element={<Wizard />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/data" element={<Data />} />
       </Routes>
