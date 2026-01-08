@@ -65,6 +65,7 @@ def save_step2(
     user_id: int,
     payload: UserStep2Request,
     session: Session = Depends(get_session),
+    
 ):
     """
     POST /api/users/{user_id}/step2
@@ -93,6 +94,9 @@ def save_step2(
         user.state = payload.state
     if payload.zip is not None:
         user.zip = payload.zip
+    if payload.birthdate is not None:
+        user.birthdate = payload.birthdate
+
 
     user.step2_completed = True
 
@@ -123,8 +127,19 @@ def save_step3(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if payload.about_me is not None:
+        user.about_me = payload.about_me
+    if payload.street is not None:
+        user.street = payload.street
+    if payload.city is not None:
+        user.city = payload.city
+    if payload.state is not None:
+        user.state = payload.state
+    if payload.zip is not None:
+        user.zip = payload.zip
     if payload.birthdate is not None:
         user.birthdate = payload.birthdate
+
 
     user.step3_completed = True
 

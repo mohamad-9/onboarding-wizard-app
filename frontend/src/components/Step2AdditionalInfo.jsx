@@ -6,6 +6,10 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [zip, setZip] = useState("");
+
+  // ✅ Add birthdate here too if admin enables it for Step 2
+  const [birthdate, setBirthdate] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   // POST because we UPDATE user data
@@ -17,7 +21,7 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
       const response = await fetch(
         `http://127.0.0.1:8000/api/users/${userId}/step2`,
         {
-          method: "POST", // POST = update/save
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             about_me: aboutMe,
@@ -25,6 +29,9 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
             city,
             state: stateVal,
             zip,
+
+            // ✅ Step 2 can optionally include birthdate too
+            birthdate: birthdate || null,
           }),
         }
       );
@@ -83,7 +90,20 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
           </>
         )}
 
-        <button disabled={loading}>
+        {/* ✅ Birthdate on Step 2 if enabled */}
+        {config.step2_birthdate && (
+          <div style={{ marginTop: "10px" }}>
+            <label>Birthdate</label>
+            <br />
+            <input
+              type="date"
+              value={birthdate}
+              onChange={(e) => setBirthdate(e.target.value)}
+            />
+          </div>
+        )}
+
+        <button disabled={loading} style={{ marginTop: "15px" }}>
           {loading ? "Saving..." : "Save Step 2 → Step 3"}
         </button>
       </form>

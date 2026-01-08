@@ -4,6 +4,8 @@ from typing import Optional
 from sqlmodel import SQLModel
 
 
+
+
 class UserStartRequest(SQLModel):
     """
     Request body for starting onboarding (step 1).
@@ -25,13 +27,20 @@ class UserStep2Request(SQLModel):
     city: Optional[str] = None
     state: Optional[str] = None
     zip: Optional[str] = None
+    birthdate: Optional[date] = None
+
 
 
 class UserStep3Request(SQLModel):
-    """
-    Request body for saving step 3 data.
-    """
+    about_me: Optional[str] = None
+
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+
     birthdate: Optional[date] = None
+
 
 
 class UserRead(SQLModel):
