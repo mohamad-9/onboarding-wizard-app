@@ -9,50 +9,72 @@ function Step3FinalInfo({ config, userId }) {
   const [birthdate, setBirthdate] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // POST because we UPDATE user data
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const validate = () => {
+    if (config.step3_about_me) {
+      if (!aboutMe.trim()) return "About Me is required.";
+    }
 
-  // ✅ Build body dynamically (partial update)
-  const body = {};
+    if (config.step3_address) {
+      if (!street.trim()) return "Street is required.";
+      if (!city.trim()) return "City is required.";
+      if (!stateVal.trim()) return "State is required.";
+      if (!zip.trim()) return "Zip is required.";
+    }
 
-  if (config.step3_about_me && aboutMe.trim() !== "") {
-    body.about_me = aboutMe;
-  }
+    if (config.step3_birthdate) {
+      if (!birthdate) return "Birthdate is required.";
+    }
 
-  if (config.step3_address) {
-    if (street.trim() !== "") body.street = street;
-    if (city.trim() !== "") body.city = city;
-    if (stateVal.trim() !== "") body.state = stateVal;
-    if (zip.trim() !== "") body.zip = zip;
-  }
+    return null;
+  };
 
-  if (config.step3_birthdate && birthdate) {
-    body.birthdate = birthdate;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/api/users/${userId}/step3`,
-      {
-        method: "POST", // POST = update
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body), // ✅ only what we want to update
-      }
-    );
+    const msg = validate();
+    if (msg) {
+      setError(msg);
+      return;
+    }
 
-    if (!response.ok) throw new Error("Failed to save step 3");
+    // ✅ partial update body (only send enabled fields)
+    const body = {};
 
-    alert("🎉 Onboarding complete!");
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (config.step3_about_me) body.about_me = aboutMe.trim();
 
+    if (config.step3_address) {
+      body.street = street.trim();
+      body.city = city.trim();
+      body.state = stateVal.trim();
+      body.zip = zip.trim();
+    }
+
+    if (config.step3_birthdate) body.birthdate = birthdate;
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/users/${userId}/step3`,
+        {
+          method: "POST", // POST = save/update
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to save step 3");
+
+      alert("🎉 Onboarding complete!");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -62,10 +84,10 @@ function Step3FinalInfo({ config, userId }) {
         {config.step3_about_me && (
           <div>
             <label>About Me</label>
-            <br />
             <textarea
               value={aboutMe}
               onChange={(e) => setAboutMe(e.target.value)}
+              placeholder="Write a short bio..."
             />
           </div>
         )}
@@ -77,22 +99,35 @@ function Step3FinalInfo({ config, userId }) {
               <input
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
+                placeholder="123 Main St"
               />
             </div>
+
             <div>
               <label>City</label>
-              <input value={city} onChange={(e) => setCity(e.target.value)} />
+              <input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Riyadh"
+              />
             </div>
+
             <div>
               <label>State</label>
               <input
                 value={stateVal}
                 onChange={(e) => setStateVal(e.target.value)}
+                placeholder="(free text)"
               />
             </div>
+
             <div>
               <label>Zip</label>
-              <input value={zip} onChange={(e) => setZip(e.target.value)} />
+              <input
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                placeholder="12345"
+              />
             </div>
           </>
         )}
@@ -100,7 +135,6 @@ function Step3FinalInfo({ config, userId }) {
         {config.step3_birthdate && (
           <div style={{ marginTop: "10px" }}>
             <label>Birthdate</label>
-            <br />
             <input
               type="date"
               value={birthdate}
@@ -113,6 +147,8 @@ function Step3FinalInfo({ config, userId }) {
           {loading ? "Saving..." : "Finish Onboarding"}
         </button>
       </form>
+
+      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
     </div>
   );
 }

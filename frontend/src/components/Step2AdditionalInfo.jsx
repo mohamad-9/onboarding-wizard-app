@@ -6,42 +6,74 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [zip, setZip] = useState("");
-
-  // ✅ Add birthdate here too if admin enables it for Step 2
   const [birthdate, setBirthdate] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // POST because we UPDATE user data
+  const validate = () => {
+    // If About Me component is ON, require it
+    if (config.step2_about_me) {
+      if (!aboutMe.trim()) return "About Me is required.";
+    }
+
+    // If Address component is ON, require all address fields
+    if (config.step2_address) {
+      if (!street.trim()) return "Street is required.";
+      if (!city.trim()) return "City is required.";
+      if (!stateVal.trim()) return "State is required.";
+      if (!zip.trim()) return "Zip is required.";
+    }
+
+    // If Birthdate is ON, require it
+    if (config.step2_birthdate) {
+      if (!birthdate) return "Birthdate is required.";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    const msg = validate();
+    if (msg) {
+      setError(msg);
+      return;
+    }
+
+    // ✅ partial update body (only send enabled fields)
+    const body = {};
+
+    if (config.step2_about_me) body.about_me = aboutMe.trim();
+
+    if (config.step2_address) {
+      body.street = street.trim();
+      body.city = city.trim();
+      body.state = stateVal.trim();
+      body.zip = zip.trim();
+    }
+
+    if (config.step2_birthdate) body.birthdate = birthdate;
+
     setLoading(true);
 
     try {
       const response = await fetch(
         `http://127.0.0.1:8000/api/users/${userId}/step2`,
         {
-          method: "POST",
+          method: "POST", // POST = save/update
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            about_me: aboutMe,
-            street,
-            city,
-            state: stateVal,
-            zip,
-
-            // ✅ Step 2 can optionally include birthdate too
-            birthdate: birthdate || null,
-          }),
+          body: JSON.stringify(body),
         }
       );
 
       if (!response.ok) throw new Error("Failed to save step 2");
 
-      localStorage.setItem("onboarding_step", "3");
       onNext();
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -55,10 +87,10 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
         {config.step2_about_me && (
           <div>
             <label>About Me</label>
-            <br />
             <textarea
               value={aboutMe}
               onChange={(e) => setAboutMe(e.target.value)}
+              placeholder="Write a short bio..."
             />
           </div>
         )}
@@ -70,31 +102,42 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
               <input
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
+                placeholder="123 Main St"
               />
             </div>
+
             <div>
               <label>City</label>
-              <input value={city} onChange={(e) => setCity(e.target.value)} />
+              <input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Riyadh"
+              />
             </div>
+
             <div>
               <label>State</label>
               <input
                 value={stateVal}
                 onChange={(e) => setStateVal(e.target.value)}
+                placeholder="(free text)"
               />
             </div>
+
             <div>
               <label>Zip</label>
-              <input value={zip} onChange={(e) => setZip(e.target.value)} />
+              <input
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                placeholder="12345"
+              />
             </div>
           </>
         )}
 
-        {/* ✅ Birthdate on Step 2 if enabled */}
         {config.step2_birthdate && (
           <div style={{ marginTop: "10px" }}>
             <label>Birthdate</label>
-            <br />
             <input
               type="date"
               value={birthdate}
@@ -107,6 +150,8 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
           {loading ? "Saving..." : "Save Step 2 → Step 3"}
         </button>
       </form>
+
+      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
     </div>
   );
 }
