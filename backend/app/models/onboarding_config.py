@@ -21,3 +21,10 @@ class OnboardingConfig(SQLModel, table=True):
     step3_about_me: bool = Field(default=False)
     step3_address: bool = Field(default=True)
     step3_birthdate: bool = Field(default=False)
+
+
+
+
+
+
+

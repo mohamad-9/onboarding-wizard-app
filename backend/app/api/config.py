@@ -1,69 +1,85 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models.onboarding_config import OnboardingConfig
-from app.schemas.config import OnboardingConfigUpdate, OnboardingConfigRead
-
+from app.schemas.config import OnboardingConfigRead, OnboardingConfigUpdate
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
 
-def _get_or_create_config(session: Session) -> OnboardingConfig:
+def _validate_config(cfg: OnboardingConfigUpdate) -> None:
+    step2_count = (
+        (1 if cfg.step2_about_me else 0)
+        + (1 if cfg.step2_address else 0)
+        + (1 if cfg.step2_birthdate else 0)
+    )
+    step3_count = (
+        (1 if cfg.step3_about_me else 0)
+        + (1 if cfg.step3_address else 0)
+        + (1 if cfg.step3_birthdate else 0)
+    )
+
+    if step2_count < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid config: Step 2 must have at least one component enabled.",
+        )
+    if step3_count < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid config: Step 3 must have at least one component enabled.",
+        )
+
+
+def _get_or_create_singleton_config(session: Session) -> OnboardingConfig:
     """
-    Helper that always returns a config row.
-    If none exists, it creates a default one.
+    We treat config as a singleton row in DB (one row only).
+    If it doesn't exist yet, create a default valid config.
     """
-    config = session.exec(select(OnboardingConfig)).first()
-    if not config:
-        config = OnboardingConfig()  # uses model defaults
-        session.add(config)
-        session.commit()
-        session.refresh(config)
-    return config
+    cfg = session.exec(select(OnboardingConfig)).first()
+    if cfg:
+        return cfg
+
+    cfg = OnboardingConfig(
+        # ✅ default valid setup
+        step2_about_me=True,
+        step2_address=False,
+        step2_birthdate=False,
+        step3_about_me=False,
+        step3_address=True,
+        step3_birthdate=False,
+    )
+
+    session.add(cfg)
+    session.commit()
+    session.refresh(cfg)
+    return cfg
 
 
 @router.get("", response_model=OnboardingConfigRead)
 def get_config(session: Session = Depends(get_session)):
-    """
-    GET /api/config
-
-    - Method: GET (we are READING configuration)
-    """
-    config = _get_or_create_config(session)
-    return config
+    cfg = _get_or_create_singleton_config(session)
+    return cfg
 
 
 @router.post("", response_model=OnboardingConfigRead)
-def update_config(
-    payload: OnboardingConfigUpdate,
-    session: Session = Depends(get_session),
-):
-    """
-    POST /api/config
+def update_config(payload: OnboardingConfigUpdate, session: Session = Depends(get_session)):
+    # ✅ backend rule enforcement (locked door)
+    _validate_config(payload)
 
-    - Method: POST (we are UPDATING / SAVING config)
-    - Body: any subset of the boolean flags
-    """
-    config = _get_or_create_config(session)
+    cfg = _get_or_create_singleton_config(session)
 
-    # Only update fields that were provided
-    if payload.step2_about_me is not None:
-        config.step2_about_me = payload.step2_about_me
-    if payload.step2_address is not None:
-        config.step2_address = payload.step2_address
-    if payload.step2_birthdate is not None:
-        config.step2_birthdate = payload.step2_birthdate
+    # Update fields
+    cfg.step2_about_me = payload.step2_about_me
+    cfg.step2_address = payload.step2_address
+    cfg.step2_birthdate = payload.step2_birthdate
 
-    if payload.step3_about_me is not None:
-        config.step3_about_me = payload.step3_about_me
-    if payload.step3_address is not None:
-        config.step3_address = payload.step3_address
-    if payload.step3_birthdate is not None:
-        config.step3_birthdate = payload.step3_birthdate
+    cfg.step3_about_me = payload.step3_about_me
+    cfg.step3_address = payload.step3_address
+    cfg.step3_birthdate = payload.step3_birthdate
 
-    session.add(config)
+    session.add(cfg)
     session.commit()
-    session.refresh(config)
-
-    return config
+    session.refresh(cfg)
+    return cfg
