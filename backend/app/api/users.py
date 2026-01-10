@@ -114,12 +114,11 @@ def save_step2(
     return user
 
 
-@router.post("/{user_id}/step3", response_model=UserRead)
-def save_step3(
-    user_id: int,
-    payload: UserStep3Request,
-    session: Session = Depends(get_session),
-):
+
+@router.post("/{user_id}/step3")
+def save_step3(user_id: int, payload: UserStep3Request, session: Session = Depends(get_session)):
+    user = session.get(User, user_id)
+
     """
     POST /api/users/{user_id}/step3
 
@@ -130,30 +129,30 @@ def save_step3(
     - birthdate
     - sets step3_completed = True
     """
-    user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if payload.about_me is not None:
+    # ✅ update ONLY if provided
+    if payload.about_me is not None and payload.about_me != "":
         user.about_me = payload.about_me
-    if payload.street is not None:
+
+    if payload.street is not None and payload.street != "":
         user.street = payload.street
-    if payload.city is not None:
+    if payload.city is not None and payload.city != "":
         user.city = payload.city
-    if payload.state is not None:
+    if payload.state is not None and payload.state != "":
         user.state = payload.state
-    if payload.zip is not None:
+    if payload.zip is not None and payload.zip != "":
         user.zip = payload.zip
+
     if payload.birthdate is not None:
         user.birthdate = payload.birthdate
-
 
     user.step3_completed = True
 
     session.add(user)
     session.commit()
     session.refresh(user)
-
     return user
 
 
