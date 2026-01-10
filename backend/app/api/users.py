@@ -16,6 +16,13 @@ from app.security import hash_password
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
+@router.get("/{user_id}", response_model=UserRead)
+def get_user(user_id: int, session: Session = Depends(get_session)):
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
 
 @router.post("/start", response_model=UserRead)
 def start_onboarding(
@@ -160,3 +167,9 @@ def list_users(session: Session = Depends(get_session)):
     """
     users = session.exec(select(User).order_by(User.created_at)).all()
     return users
+
+
+
+
+
+
