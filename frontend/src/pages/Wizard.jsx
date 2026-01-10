@@ -2,22 +2,23 @@ import { useEffect, useState } from "react";
 import Step1CreateAccount from "../components/Step1CreateAccount";
 import Step2AdditionalInfo from "../components/Step2AdditionalInfo";
 import Step3FinalInfo from "../components/Step3FinalInfo";
+import Progress from "../components/Progress";
 
 function Wizard() {
   const [config, setConfig] = useState(null);
-  const [user, setUser] = useState(null); // ✅ DB-backed user progress
+  const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
   const userId = localStorage.getItem("user_id");
 
-  // GET config (read-only)
+  // GET config
   const loadConfig = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/config"); // GET
+    const res = await fetch("http://127.0.0.1:8000/api/config");
     const data = await res.json();
     setConfig(data);
   };
 
-  // GET user progress (read-only)
+  // GET user progress (DB-backed resume)
   const loadUser = async () => {
     if (!userId) {
       setUser(null);
@@ -27,9 +28,8 @@ function Wizard() {
 
     setLoadingUser(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/users/${userId}`); // GET
+      const res = await fetch(`http://127.0.0.1:8000/api/users/${userId}`);
       if (!res.ok) {
-        // user not found or deleted -> clear localStorage
         localStorage.removeItem("user_id");
         setUser(null);
         return;
@@ -60,11 +60,13 @@ function Wizard() {
   if (!config) return <p>Loading config...</p>;
   if (loadingUser) return <p>Loading user progress...</p>;
 
-  // Decide which step based on DB flags
   const showStep1 = !userId || !user;
   const showStep2 = user && !user.step2_completed;
   const showStep3 = user && user.step2_completed && !user.step3_completed;
   const showComplete = user && user.step3_completed;
+
+  // Decide current step number for progress indicator
+  const currentStep = showStep1 ? 1 : showStep2 ? 2 : 3;
 
   return (
     <div>
@@ -78,6 +80,9 @@ function Wizard() {
           Restart
         </button>
       </div>
+
+      {/* ✅ NEW: Progress indicator */}
+      {!showComplete && <Progress currentStep={currentStep} />}
 
       {showStep1 && (
         <Step1CreateAccount onSuccess={() => window.location.reload()} />
@@ -97,6 +102,9 @@ function Wizard() {
         <div>
           <h3>✅ Onboarding Complete</h3>
           <p>You can view your record in the Data page.</p>
+          <button type="button" className="secondary" onClick={restart}>
+            Start Over
+          </button>
         </div>
       )}
     </div>

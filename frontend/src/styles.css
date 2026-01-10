@@ -113,3 +113,65 @@ th, td {
 th {
   background: #f0f3ff;
 }
+
+/* ✅ NEW: Wizard Progress Indicator */
+
+.progress {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  margin: 16px 0 18px 0;
+  padding: 12px;
+  border: 1px solid #e6e8f0;
+  border-radius: 12px;
+  background: #fbfcff;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  flex: 1;
+}
+
+.progress-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid #d5d9e6;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: white;
+  color: #334155;
+  flex-shrink: 0;
+}
+
+.progress-label {
+  font-weight: 700;
+  color: #334155;
+  font-size: 14px;
+}
+
+.progress-line {
+  height: 2px;
+  background: #d5d9e6;
+  flex: 1;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.progress-step.active .progress-circle {
+  border-color: #1f6feb;
+  color: #1f6feb;
+}
+
+.progress-step.done .progress-circle {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.progress-step.done ~ .progress-step .progress-line {
+  background: #d5d9e6;
+}
