@@ -7,17 +7,21 @@ import Data from "./pages/Data";
 function App() {
   return (
     <BrowserRouter>
-      <nav style={{ marginBottom: "20px" }}>
-        <Link to="/">Onboarding</Link> |{" "}
-        <Link to="/admin">Admin</Link> |{" "}
+      <nav className="nav">
+        <Link to="/">Onboarding</Link>
+        <Link to="/admin">Admin</Link>
         <Link to="/data">Data</Link>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Wizard />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/data" element={<Data />} />
-      </Routes>
+      <div className="container">
+        <div className="card">
+          <Routes>
+            <Route path="/" element={<Wizard />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/data" element={<Data />} />
+          </Routes>
+        </div>
+      </div>
     </BrowserRouter>
   );
 }

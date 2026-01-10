@@ -33,12 +33,12 @@ function Data() {
   return (
     <div>
       <h2>Data Table</h2>
-
       <button type="button" onClick={loadUsers} style={{ marginBottom: "10px" }}>
         Refresh
       </button>
-
-      <table border="1" cellPadding="8" cellSpacing="0">
+      <div className="table-wrap">
+      <table>
+        <table border="1" cellPadding="8" cellSpacing="0">
         <thead>
           <tr>
             <th>ID</th>
@@ -73,7 +73,8 @@ function Data() {
           ))}
         </tbody>
       </table>
-
+      </table>
+      </div>
       {users.length === 0 && <p>No users yet.</p>}
     </div>
   );
