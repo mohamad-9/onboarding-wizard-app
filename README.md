@@ -112,7 +112,84 @@ Below is a mapping of the original requirements to the implemented solution.
 - JavaScript
 - React Router
 
-### Tooling
+---
+
+## 🗄️ Database Schema (Simplified)
+
+The app uses a relational MySQL database with two main tables:
+- `user` — stores onboarding progress and user data
+- `config` — stores admin configuration for Step 2 and Step 3
+
+### User Table
+
+```text
+┌───────────────────────────────┐
+│             user              │
+├───────────────────────────────┤
+│ id (PK)                       │
+│ email (unique)                │
+│ password_hash                 │
+│                               │
+│ about_me (nullable)           │
+│ street (nullable)             │
+│ city (nullable)               │
+│ state (nullable)              │
+│ zip (nullable)                │
+│ birthdate (nullable)          │
+│                               │
+│ step2_completed (boolean)     │
+│ step3_completed (boolean)     │
+│ created_at (timestamp)        │
+└───────────────────────────────┘
+
+### Config Table
+┌───────────────────────────────┐
+│            config             │
+├───────────────────────────────┤
+│ id (PK)                       │
+│                               │
+│ step2_about_me (boolean)      │
+│ step2_address (boolean)       │
+│ step2_birthdate (boolean)     │
+│                               │
+│ step3_about_me (boolean)      │
+│ step3_address (boolean)       │
+│ step3_birthdate (boolean)     │
+└───────────────────────────────┘
+
+
+## 📊 Sample Dataset
+
+Below is an example of what the data looks like after a user completes onboarding.
+
+### Example `user` Table Row
+
+```json
+{
+  "id": 1,
+  "email": "test.user@example.com",
+  "about_me": "Frontend engineer interested in startups",
+  "street": "123 Main St",
+  "city": "Riyadh",
+  "state": "Riyadh Province",
+  "zip": "12345",
+  "birthdate": "1995-01-01",
+  "step2_completed": true,
+  "step3_completed": true,
+  "created_at": "2026-01-12T10:15:30"
+}
+
+Example config Table Row### Tooling
+
+{
+  "step2_about_me": true,
+  "step2_address": false,
+  "step2_birthdate": true,
+  "step3_about_me": false,
+  "step3_address": true,
+  "step3_birthdate": false
+}
+
 - Git
 - Docker + Docker Compose (frontend + backend)
 
