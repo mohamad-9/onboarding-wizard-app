@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "../lib/api";
 
 function Step3FinalInfo({ config, userId }) {
   const [aboutMe, setAboutMe] = useState("");
@@ -12,8 +13,8 @@ function Step3FinalInfo({ config, userId }) {
   const [error, setError] = useState(null);
 
   const validate = () => {
-    if (config.step3_about_me) {
-      if (!aboutMe.trim()) return "About Me is required.";
+    if (config.step3_about_me && !aboutMe.trim()) {
+      return "About Me is required.";
     }
 
     if (config.step3_address) {
@@ -23,8 +24,8 @@ function Step3FinalInfo({ config, userId }) {
       if (!zip.trim()) return "Zip is required.";
     }
 
-    if (config.step3_birthdate) {
-      if (!birthdate) return "Birthdate is required.";
+    if (config.step3_birthdate && !birthdate) {
+      return "Birthdate is required.";
     }
 
     return null;
@@ -40,7 +41,7 @@ function Step3FinalInfo({ config, userId }) {
       return;
     }
 
-    // ✅ partial update body (only send enabled fields)
+    // ✅ partial update body (VERY IMPORTANT)
     const body = {};
 
     if (config.step3_about_me) body.about_me = aboutMe.trim();
@@ -58,9 +59,9 @@ function Step3FinalInfo({ config, userId }) {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/users/${userId}/step3`,
+        apiUrl(`/api/users/${userId}/step3`),
         {
-          method: "POST", // POST = save/update
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         }
