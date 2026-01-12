@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiUrl } from "../lib/api";
 
 function Admin() {
   const [config, setConfig] = useState(null);
@@ -6,7 +7,7 @@ function Admin() {
 
   // GET = read config
   const loadConfig = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/config");
+    const res = await fetch(apiUrl("/api/config"));
     const data = await res.json();
     setConfig(data);
   };
@@ -32,8 +33,10 @@ function Admin() {
       (config.step3_address ? 1 : 0) +
       (config.step3_birthdate ? 1 : 0);
 
-    if (step2Count < 1) return "Step 2 must have at least one component enabled.";
-    if (step3Count < 1) return "Step 3 must have at least one component enabled.";
+    if (step2Count < 1)
+      return "Step 2 must have at least one component enabled.";
+    if (step3Count < 1)
+      return "Step 3 must have at least one component enabled.";
     return null;
   };
 
@@ -47,7 +50,7 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/config", {
+      const res = await fetch(apiUrl("/api/config"), {
         method: "POST", // POST = update/save
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
