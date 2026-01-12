@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "../lib/api";
 
 function Step1CreateAccount({ onSuccess }) {
   const [email, setEmail] = useState("");
@@ -13,7 +14,8 @@ function Step1CreateAccount({ onSuccess }) {
 
   const validate = () => {
     if (!email.trim()) return "Email is required.";
-    if (!isEmailValid(email.trim())) return "Please enter a valid email (example: name@example.com).";
+    if (!isEmailValid(email.trim()))
+      return "Please enter a valid email (example: name@example.com).";
     if (!password) return "Password is required.";
     if (password.length < 8) return "Password must be at least 8 characters.";
     return null;
@@ -32,7 +34,7 @@ function Step1CreateAccount({ onSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/users/start", {
+      const response = await fetch(apiUrl("/api/users/start"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
