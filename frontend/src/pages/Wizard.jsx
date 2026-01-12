@@ -3,6 +3,7 @@ import Step1CreateAccount from "../components/Step1CreateAccount";
 import Step2AdditionalInfo from "../components/Step2AdditionalInfo";
 import Step3FinalInfo from "../components/Step3FinalInfo";
 import Progress from "../components/Progress";
+import { apiUrl } from "../lib/api";
 
 function Wizard() {
   const [config, setConfig] = useState(null);
@@ -13,7 +14,7 @@ function Wizard() {
 
   // GET config
   const loadConfig = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/config");
+    const res = await fetch(apiUrl("/api/config"));
     const data = await res.json();
     setConfig(data);
   };
@@ -28,7 +29,7 @@ function Wizard() {
 
     setLoadingUser(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/users/${userId}`);
+      const res = await fetch(apiUrl(`/api/users/${userId}`));
       if (!res.ok) {
         localStorage.removeItem("user_id");
         setUser(null);
@@ -44,6 +45,7 @@ function Wizard() {
   useEffect(() => {
     loadConfig().catch(console.error);
     loadUser().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const restart = () => {
@@ -81,7 +83,7 @@ function Wizard() {
         </button>
       </div>
 
-      {/* ✅ NEW: Progress indicator */}
+      {/* ✅ Progress indicator */}
       {!showComplete && <Progress currentStep={currentStep} />}
 
       {showStep1 && (
