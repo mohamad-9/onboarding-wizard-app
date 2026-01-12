@@ -1,18 +1,25 @@
-from sqlmodel import create_engine, Session
+from sqlmodel import SQLModel, create_engine
 from app.config.settings import settings
+import os
 
+def make_engine():
+    db_url = settings.database_url
 
-# Create the global database engine using the URL from our settings
-engine = create_engine(settings.database_url, echo=True)
-# echo=True means SQL queries will be printed in the terminal (useful for learning)
+    connect_args = {}
 
+    # If Render secret file exists, use it for SSL
+    ca_path = "/etc/secrets/aiven-ca.pem"
+    if os.path.exists(ca_path):
+        connect_args = {
+            "ssl": {"ca": ca_path}
+        }
 
-def get_session():
-    """
-    Dependency function to provide a database session.
+        # Also: remove unsupported query params if they exist
+        db_url = db_url.replace("?ssl-mode=REQUIRED", "")
+        db_url = db_url.replace("&ssl-mode=REQUIRED", "")
 
-    Later, we'll use this with FastAPI's dependency injection
-    to get a Session in our endpoint functions.
-    """
-    with Session(engine) as session:
-        yield session
+    print("DB URL from settings:", db_url)
+
+    return create_engine(db_url, echo=True, connect_args=connect_args)
+
+engine = make_engine()
