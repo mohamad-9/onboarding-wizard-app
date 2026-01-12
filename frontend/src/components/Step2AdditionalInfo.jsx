@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "../lib/api";
 
 function Step2AdditionalInfo({ config, userId, onNext }) {
   const [aboutMe, setAboutMe] = useState("");
@@ -60,14 +61,11 @@ function Step2AdditionalInfo({ config, userId, onNext }) {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/users/${userId}/step2`,
-        {
-          method: "POST", // POST = save/update
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
+      const response = await fetch(apiUrl(`/api/users/${userId}/step2`), {
+        method: "POST", // POST = save/update
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
       if (!response.ok) throw new Error("Failed to save step 2");
 
