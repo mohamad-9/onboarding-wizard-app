@@ -190,6 +190,7 @@ Example config Table Row### Tooling
   "step3_address": true,
   "step3_birthdate": false
 }
+```
 
 - Git
 - Docker + Docker Compose (frontend + backend)
