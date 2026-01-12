@@ -8,6 +8,8 @@ from app.api.config import router as config_router
 from app.models.user import User  # noqa: F401
 from app.models.onboarding_config import OnboardingConfig  # noqa: F401
 from fastapi.middleware.cors import CORSMiddleware
+from app.db import init_db
+
 
 
 
@@ -29,6 +31,8 @@ app.include_router(users_router)
 app.include_router(config_router)
 
 
+
+
 @app.on_event("startup")
 def on_startup():
     """
@@ -36,6 +40,7 @@ def on_startup():
 
     Ensures all tables are created.
     """
+    init_db()
     print("DB URL from settings:", settings.database_url)
     SQLModel.metadata.create_all(engine)
     print("✅ Database tables created (or already exist).")
